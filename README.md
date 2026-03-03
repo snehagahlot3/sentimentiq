@@ -1,70 +1,243 @@
-# Getting Started with Create React App
+<div align="center">
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 📡 SentimentIQ
 
-## Available Scripts
+### AI-Powered News Intelligence System
 
-In the project directory, you can run:
+*Not just positive/negative — full intelligence reporting with momentum, volatility, market mood & AI-generated insights*
 
-### `npm start`
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-sentimentiq--two.vercel.app-00e5a0?style=for-the-badge)](https://sentimentiq-two.vercel.app)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Groq](https://img.shields.io/badge/Groq-LLaMA_3.3_70B-orange?style=for-the-badge)](https://groq.com)
+[![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+</div>
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🎯 What is SentimentIQ?
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+SentimentIQ is a real-time news intelligence dashboard that goes far beyond simple sentiment classification. It fetches live headlines on any topic, runs them through an AI model, computes financial-grade metrics, and generates a full analytical intelligence report — all in the browser.
 
-### `npm run build`
+This is not a tutorial project. It's a production-grade, multi-API system demonstrating:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Multi-step AI reasoning** — 3 sequential AI calls per analysis
+- **Real-time data pipeline** — live news → structured sentiment → intelligence report
+- **Financial analytics** — volatility, momentum, market mood computed from first principles
+- **Full-stack architecture** — React frontend + Vercel serverless backend
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## ✨ Features
 
-### `npm run eject`
+### 🔴 Live News Intelligence
+Fetches the latest 12 headlines from NewsAPI on any topic in real time. Topics include AI, stock market, bitcoin, climate change, healthcare, and more — or type anything custom.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 🧠 AI Sentiment Scoring
+Every headline is analyzed by LLaMA 3.3 70B and scored across four dimensions:
+- **Score** — from -1.0 (very negative) to +1.0 (very positive)
+- **Label** — Positive / Neutral / Negative
+- **Confidence** — how certain the model is
+- **Impact** — how significant this news is
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 📈 Sentiment Trend Chart
+Interactive line chart showing raw sentiment scores alongside a 3-point moving average, revealing the overall trajectory of news sentiment across headlines.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 🥧 Distribution Pie Chart
+Visual breakdown of positive vs neutral vs negative headline count for quick at-a-glance assessment.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 📊 Financial-Grade Metrics
+Six computed metrics displayed as stat cards:
+| Metric | Description |
+|--------|-------------|
+| Headlines | Total articles analyzed |
+| Avg Score | Mean sentiment across all headlines |
+| Volatility | Standard deviation of sentiment scores |
+| Momentum | Linear regression slope — is sentiment trending up or down? |
+| Market Mood | Bullish 📈 / Bearish 📉 / Stable ⚖️ |
+| Positive Rate | Ratio of positive to total headlines |
 
-## Learn More
+### ⚡ Most Impactful Article
+Ranks every article by `impact × confidence` score and highlights the single most significant headline, with an AI-generated one-sentence explanation of why it matters.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 🟢🔴 Sentiment Highlights
+Side-by-side display of the most positive and most negative headline, with scores, source, date, and a direct link to the full article.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 💡 AI Intelligence Report
+The crown feature — after all sentiment data is computed, a second AI call generates a full structured report:
+- **Executive Summary** — 2-3 sentence analysis with specific numbers
+- **Key Insight** — one sharp business-level observation
+- **Risk Flag** — biggest concern in the current news landscape
+- **Opportunity Signal** — positive trend worth watching
+- **Momentum Interpretation** — what the trend direction actually means
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 🏗️ Architecture
 
-### Analyzing the Bundle Size
+```
+User selects topic
+        │
+        ▼
+┌─────────────────────────────────┐
+│     Vercel Serverless Function  │
+│     /api/news.js                │
+│     → Fetches from NewsAPI      │
+│     → Returns 12 articles       │
+└─────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────┐
+│     Groq API — Step 1           │
+│     LLaMA 3.3 70B               │
+│     → Scores each headline      │
+│     → score, label, confidence, │
+│       impact, emotion, summary  │
+└─────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────┐
+│     Local Computation           │
+│     → Volatility (std dev)      │
+│     → Momentum (linear reg.)    │
+│     → Moving average            │
+│     → Top article ranking       │
+│     → Market mood               │
+└─────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────┐
+│     Groq API — Step 2           │
+│     LLaMA 3.3 70B               │
+│     → Generates intelligence    │
+│       report from all data      │
+└─────────────────────────────────┘
+        │
+        ▼
+   Dashboard renders everything
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+## 🛠️ Tech Stack
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Frontend | React 18 | UI & state management |
+| Charts | Recharts | Interactive visualizations |
+| AI Model | Groq API (LLaMA 3.3 70B) | Sentiment analysis + insights |
+| News Data | NewsAPI.org | Live headline fetching |
+| Backend | Vercel Serverless Functions | NewsAPI proxy (avoids CORS) |
+| Hosting | Vercel | Production deployment |
+| Fonts | IBM Plex Mono | Monospace terminal aesthetic |
 
-### Advanced Configuration
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## ⚙️ Local Setup
 
-### Deployment
+### Prerequisites
+- Node.js v18+
+- A free [Groq API key](https://console.groq.com)
+- A free [NewsAPI key](https://newsapi.org/register)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Installation
 
-### `npm run build` fails to minify
+```bash
+# Clone the repository
+git clone https://github.com/snehagahlot3/sentimentiq.git
+cd sentimentiq
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# Install dependencies
+npm install
+
+# Create environment file
+touch .env
+```
+
+Add to your `.env` file:
+```env
+REACT_APP_GROQ_KEY=your_groq_api_key_here
+REACT_APP_NEWS_KEY=your_newsapi_key_here
+```
+
+```bash
+# Start development server
+npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000) — the app runs locally using a CORS proxy for NewsAPI.
+
+---
+
+## 🚀 Deployment
+
+This project is deployed on Vercel. The `api/news.js` serverless function handles NewsAPI requests server-side, bypassing browser CORS restrictions.
+
+To deploy your own instance:
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel --prod
+```
+
+Add your environment variables in the Vercel dashboard under **Settings → Environment Variables**.
+
+---
+
+## 📁 Project Structure
+
+```
+sentimentiq/
+├── api/
+│   └── news.js              # Vercel serverless function (NewsAPI proxy)
+├── public/
+├── src/
+│   ├── App.js               # Main dashboard — all logic and UI
+│   ├── App.css
+│   └── index.js
+├── .env                     # API keys (never committed)
+├── .gitignore
+├── package.json
+└── README.md
+```
+
+---
+
+## 🔑 API Keys
+
+| Service | Link | Free Tier |
+|---------|------|-----------|
+| Groq | [console.groq.com](https://console.groq.com) | Free, no credit card |
+| NewsAPI | [newsapi.org/register](https://newsapi.org/register) | 100 requests/day free |
+
+---
+
+## 🔒 Security
+
+API keys are stored as environment variables and never committed to the repository. The `.env` file is included in `.gitignore` by default. On Vercel, keys are encrypted and injected at build time.
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you'd like to change.
+
+---
+
+## 📄 License
+
+MIT © 2026 — [snehagahlot3](https://github.com/snehagahlot3)
+
+---
+
+<div align="center">
+
+Built with ❤️ using React, Groq AI, and NewsAPI
+
+⭐ Star this repo if you found it useful!
+
+</div>
