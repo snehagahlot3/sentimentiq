@@ -6,14 +6,23 @@ import {
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_API_KEY = process.env.REACT_APP_GROQ_KEY;
-const NEWS_API_KEY = process.env.REACT_APP_NEWS_KEY;
 
 async function fetchRealNews(topic) {
-  const targetUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(topic)}&sortBy=publishedAt&pageSize=12&language=en&apiKey=${NEWS_API_KEY}`;
-  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
-  const res = await fetch(proxyUrl);
-  if (!res.ok) throw new Error("Failed to fetch news. Proxy may be down.");
-  const data = await res.json();
+  // Uses Vercel serverless function in production, direct proxy in dev
+  const isLocal = window.location.hostname === "localhost";
+  let data;
+
+  if (isLocal) {
+    const targetUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(topic)}&sortBy=publishedAt&pageSize=12&language=en&apiKey=${process.env.REACT_APP_NEWS_KEY}`;
+    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+    if (!res.ok) throw new Error("Failed to fetch news.");
+    data = await res.json();
+  } else {
+    const res = await fetch(`/api/news?topic=${encodeURIComponent(topic)}`);
+    if (!res.ok) throw new Error("Failed to fetch news from server.");
+    data = await res.json();
+  }
+
   if (data.status !== "ok") throw new Error("NewsAPI: " + (data.message || data.status));
   const articles = data.articles.filter(a => a.title && a.title !== "[Removed]");
   if (articles.length === 0) throw new Error("No articles found. Try a different topic.");
@@ -157,7 +166,6 @@ export default function App() {
     setError(""); setHeadlines([]); setSentiments([]); setMetrics(null); setInsights(null);
     setLoading(true);
     if (!GROQ_API_KEY) { setError("❌ REACT_APP_GROQ_KEY missing from .env"); setLoading(false); return; }
-    if (!NEWS_API_KEY) { setError("❌ REACT_APP_NEWS_KEY missing from .env"); setLoading(false); return; }
     try {
       setPhase("fetching");
       const news = await fetchRealNews(topic);
@@ -189,7 +197,6 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "#0a0c10", color: "#e8eaf0", fontFamily: "'IBM Plex Mono', monospace" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap'); *{box-sizing:border-box;} a{color:inherit;} input:focus{outline:none;border-color:#00e5a0!important;}`}</style>
 
-      {/* Header */}
       <div style={{ borderBottom: "1px solid #1e2230", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.02)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ width: 36, height: 36, background: "linear-gradient(135deg,#00e5a0,#0090ff)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>📡</div>
@@ -205,8 +212,6 @@ export default function App() {
       </div>
 
       <div style={{ padding: 32, maxWidth: 1200, margin: "0 auto" }}>
-
-        {/* ── CONFIG ── */}
         <div style={{ ...card, marginBottom: 20 }}>
           <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#4a5568", marginBottom: 14 }}>⚙ Intelligence Configuration</div>
           <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
@@ -240,7 +245,6 @@ export default function App() {
               Intelligence report for: <span style={{ color: "#00e5a0", fontWeight: 700 }}>"{lastTopic}"</span>
             </div>
 
-            {/* ── 1. METRICS ROW ── */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 14, marginBottom: 20 }}>
               {[
                 { val: enriched.length, label: "Headlines", color: "#e8eaf0" },
@@ -251,13 +255,12 @@ export default function App() {
                 { val: positive.length + "/" + enriched.length, label: "Positive Rate", color: "#00e5a0" },
               ].map((s, i) => (
                 <div key={i} style={{ ...card, textAlign: "center", padding: "16px 10px" }}>
-                  <div style={{ fontSize: i === 4 ? 14 : 22, fontWeight: 700, color: s.color, letterSpacing: i === 4 ? 0 : "-0.02em" }}>{s.val}</div>
+                  <div style={{ fontSize: i === 4 ? 14 : 22, fontWeight: 700, color: s.color }}>{s.val}</div>
                   <div style={{ fontSize: 10, color: "#4a5568", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 4 }}>{s.label}</div>
                 </div>
               ))}
             </div>
 
-            {/* ── 2. CHARTS ── */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20, marginBottom: 20 }}>
               <div style={card}>
                 <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#4a5568", marginBottom: 20 }}>📈 Sentiment Trend + Moving Average</div>
@@ -290,7 +293,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* ── 3. TOP IMPACT ARTICLE ── */}
             {metrics.topArticle && (
               <div style={{ ...card, marginBottom: 20, borderColor: "rgba(255,209,102,0.3)", background: "rgba(255,209,102,0.03)" }}>
                 <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#ffd166", marginBottom: 12 }}>⚡ Most Impactful Article</div>
@@ -311,7 +313,6 @@ export default function App() {
               </div>
             )}
 
-            {/* ── 4. HIGHLIGHTS ── */}
             {enriched.length > 0 && (() => {
               const best = [...enriched].sort((a, b) => (b.score || 0) - (a.score || 0))[0];
               const worst = [...enriched].sort((a, b) => (a.score || 0) - (b.score || 0))[0];
@@ -333,7 +334,6 @@ export default function App() {
               );
             })()}
 
-            {/* ── 5. ALL HEADLINES ── */}
             <div style={{ ...card, marginBottom: 20 }}>
               <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#4a5568", marginBottom: 16 }}>📋 Full Sentiment Breakdown</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -359,12 +359,11 @@ export default function App() {
               </div>
             </div>
 
-            {/* ── 6. INTELLIGENCE REPORT (BOTTOM) ── */}
             {insights && (
               <div style={{ ...card, borderColor: "rgba(0,144,255,0.3)", background: "rgba(0,144,255,0.04)" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
                   <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#0090ff" }}>💡 AI Intelligence Report</div>
-                  <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: insights.confidence_level === "high" ? "rgba(0,229,160,0.15)" : insights.confidence_level === "medium" ? "rgba(255,209,102,0.15)" : "rgba(255,77,109,0.15)", color: insights.confidence_level === "high" ? "#00e5a0" : insights.confidence_level === "medium" ? "#ffd166" : "#ff4d6d", border: `1px solid ${insights.confidence_level === "high" ? "rgba(0,229,160,0.3)" : insights.confidence_level === "medium" ? "rgba(255,209,102,0.3)" : "rgba(255,77,109,0.3)"}` }}>
+                  <span style={{ fontSize: 11, padding: "3px 10px", borderRadius: 20, background: "rgba(0,229,160,0.15)", color: "#00e5a0", border: "1px solid rgba(0,229,160,0.3)" }}>
                     {insights.confidence_level?.toUpperCase()} CONFIDENCE
                   </span>
                 </div>
