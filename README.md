@@ -216,9 +216,7 @@ sentimentiq/
 
 ---
 
-## 🔒 Security
 
-API keys are stored as environment variables and never committed to the repository. The `.env` file is included in `.gitignore` by default. On Vercel, keys are encrypted and injected at build time.
 
 ---
 
